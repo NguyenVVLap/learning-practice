@@ -20,4 +20,12 @@ public class ProductService {
         Page<Product> pageProduct = this.productRepository.findAllByCategory(categoryId, minPrice, maxPrice, pageable);
         return ResponseProductDTO.builder().totalPages(pageProduct.getTotalPages()).totalItems(pageProduct.getTotalElements()).currentPage(pageProduct.getNumber()).listProduct(pageProduct.getContent()).build();
     }
+
+    public Product getProductById(long id) {
+        return productRepository.findById(id).isPresent() ? productRepository.findById(id).get() : new Product();
+    }
+
+    public Product updateNameProduct(Product product) {
+        return productRepository.save(product);
+    }
 }
