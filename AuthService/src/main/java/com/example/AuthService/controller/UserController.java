@@ -5,26 +5,48 @@ import com.example.AuthService.entity.UserInfo;
 import com.example.AuthService.service.JwtService;
 import com.example.AuthService.service.UserInfoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class UserController {
+    @Autowired
     private UserInfoService service;
 
+    @Autowired
     private JwtService jwtService;
 
+    @Autowired
     private AuthenticationManager authenticationManager;
 
     @GetMapping("/welcome")
     public String welcome() {
         return "Welcome this endpoint is not secure";
     }
+
+    @GetMapping("/user/getUserInfo")
+    public ResponseEntity<UserInfo> getUserInfo(@RequestBody AuthRequest authRequest) {
+        UserInfo result = service.getUserByUsernameAndPassword(authRequest.getUsername(), authRequest.getPassword());
+        if (result == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().body(result);
+    }
+
+    @GetMapping("/admin/getAllUsers")
+    public ResponseEntity<List<UserInfo>> getAllUsers() {
+        return ResponseEntity.ok().body(service.getAllUser());
+    }
+
 
     @PostMapping("/addNewUser")
     public String addNewUser(@RequestBody UserInfo userInfo) {

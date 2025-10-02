@@ -51,4 +51,12 @@ public class UserInfoService implements UserDetailsService {
         repository.save(userInfo);
         return "User added successfully!";
     }
+
+    public UserInfo getUserByUsernameAndPassword(String username, String password) {
+        return repository.findByEmailAndPassword(username, encoder.encode(password));
+    }
+
+    public List<UserInfo> getAllUser() {
+        return repository.findAll();
+    }
 }

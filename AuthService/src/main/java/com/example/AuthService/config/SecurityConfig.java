@@ -1,6 +1,7 @@
 package com.example.AuthService.config;
 
 import com.example.AuthService.filter.JwtAuthFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +22,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Constructor injection for required dependencies
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
@@ -44,8 +48,8 @@ public class SecurityConfig {
                         .requestMatchers("/auth/welcome", "/auth/addNewUser", "/auth/generateToken").permitAll()
 
                         // Role-based endpoints
-                        .requestMatchers("/auth/user/**").hasAuthority("ROLE_USER")
-                        .requestMatchers("/auth/admin/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/auth/user/**").hasAuthority("USER")
+                        .requestMatchers("/auth/admin/**").hasAuthority("ADMIN")
 
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
@@ -64,15 +68,6 @@ public class SecurityConfig {
     }
 
     /*
-     * Password encoder bean (uses BCrypt hashing)
-     * Critical for secure password storage
-     */
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    /*
      * Authentication provider configuration
      * Links UserDetailsService and PasswordEncoder
      */
@@ -80,7 +75,7 @@ public class SecurityConfig {
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
+        provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
 
