@@ -53,7 +53,13 @@ public class UserInfoService implements UserDetailsService {
     }
 
     public UserInfo getUserByUsernameAndPassword(String username, String password) {
-        return repository.findByEmailAndPassword(username, encoder.encode(password));
+        Optional<UserInfo> optionalUserInfo = repository.findByEmail(username);
+        UserInfo userInfo = optionalUserInfo.orElse(null);
+        if (userInfo == null || !encoder.matches(password , userInfo.getPassword())) {
+            return null;
+        } else {
+            return userInfo;
+        }
     }
 
     public List<UserInfo> getAllUser() {
