@@ -1,25 +1,38 @@
 package com.example.AuthService.service;
 
+import com.example.AuthService.entity.UserInfo;
+import com.example.AuthService.repository.UserInfoRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Component
 public class JwtService {
     public static final String SECRET = "5367566859703373367639792F423F452848284D6251655468576D5A71347437";
+    @Autowired
+    private UserInfoRepository repository;
 
     public String generateToken(String email) { // Use email as username
         Map<String, Object> claims = new HashMap<>();
+        Optional<UserInfo> userInfo = repository.findByEmail(email);
+
+        if (userInfo.isEmpty()) {
+            throw new UsernameNotFoundException("User not found with email: " + email);
+        }
+
+        // Convert UserInfo to UserDetails (UserInfoDetails)
+        UserInfo user = userInfo.get();
+        claims.put("roles", Arrays.asList(user.getRoles()));
         return createToken(claims, email);
     }
 
