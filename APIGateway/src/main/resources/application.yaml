@@ -1,0 +1,22 @@
+server:
+  port: 8085
+spring:
+  application:
+    name: API-GATEWAY-SERVICE
+  cloud:
+    gateway:
+      routes:
+        - id: PRODUCT-SERVICE
+          uri: http://localhost:8081
+          predicates:
+            - Path=/products/**, /products
+        - id: AUTH-SERVICE
+          uri: http://localhost:8082
+          predicates:
+            - Path=/auth/**
+          filters:
+            - RemoveRequestHeader=Authorization
+security:
+  roles:
+    - path: /products/**, /products
+      role: [ADMIN]
