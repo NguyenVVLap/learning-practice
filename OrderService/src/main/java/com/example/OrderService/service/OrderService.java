@@ -3,20 +3,18 @@ package com.example.OrderService.service;
 import com.example.OrderService.dto.OrderDto;
 import com.example.OrderService.dto.Product;
 import com.example.OrderService.entity.Order;
+import com.example.OrderService.entity.OrderDetail;
 import com.example.OrderService.feignclient.ProductClient;
+import com.example.OrderService.repository.OrderDetailRepository;
 import com.example.OrderService.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,7 +25,13 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Autowired
+    private OrderDetailRepository orderDetailRepository;
+
+    @Autowired
     private ProductClient productClient;
+
+    @Autowired
+    private KafkaService kafkaService;
 
     public List<Order> getAllOrderV1() {
         return orderRepository.findAll();
@@ -84,5 +88,14 @@ public class OrderService {
 //            }
 //        });
         return productClient.getProductsWithPageSortByCategory(id);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void insertOrder(Order order) {
+        Order newOrder = orderRepository.save(order);
+        List<OrderDetail> listOrderDetail = order.getListOrderDetail().stream()
+                .peek(orderDetail -> orderDetail.setOrder(newOrder)).toList();
+        orderDetailRepository.saveAll(order.getListOrderDetail());
+        kafkaService.sendMessage("orderService", "Order created");
     }
 }

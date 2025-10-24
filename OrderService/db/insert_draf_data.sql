@@ -17,6 +17,6 @@ INSERT INTO order_detail (order_id, product_id, quantity, price) VALUES (3, 106,
 INSERT INTO order_detail (order_id, product_id, quantity, price) VALUES (3, 107, 2, 800.0);
 
 
-select * from orders;
-select * from order_detail;
+select * from orders with(nolock);
+select * from order_detail with(nolock);
 

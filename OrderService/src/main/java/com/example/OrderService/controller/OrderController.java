@@ -8,10 +8,7 @@ import com.example.OrderService.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,5 +36,11 @@ public class OrderController {
     @GetMapping("/v2/getProductWithWebClient/{id}")
     public ResponseEntity<Product> checkStockWithWebClient(@PathVariable long id) {
         return orderService.getProductWithWebClient(id);
+    }
+
+    @PostMapping
+    public ResponseEntity<Boolean> insertOrder(@RequestBody Order order) {
+        orderService.insertOrder(order);
+        return ResponseEntity.ok(true);
     }
 }
