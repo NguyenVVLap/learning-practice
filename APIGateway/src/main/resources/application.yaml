@@ -1,22 +1,41 @@
 server:
   port: 8085
+
 spring:
   application:
     name: API-GATEWAY-SERVICE
+
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true  # cho phép tự động mapping từ eureka
       routes:
         - id: PRODUCT-SERVICE
-          uri: http://localhost:8081
+          uri: lb://PRODUCT-SERVICE
           predicates:
-            - Path=/products/**, /products
-        - id: AUTH-SERVICE
-          uri: http://localhost:8082
-          predicates:
-            - Path=/auth/**
-          filters:
-            - RemoveRequestHeader=Authorization
+            - Path=/products/**,/products
+          # nếu cần filter JWT hoặc header có thể thêm sau:
+          # filters:
+          #   - RemoveRequestHeader=Cookie
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+    reactor.netty: INFO
+
 security:
   roles:
-    - path: /products/**, /products
+    - path: /products/**,/products
       role: [ADMIN]
